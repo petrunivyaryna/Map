@@ -5,6 +5,7 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable
 # from geopy.extra.rate_limiter import RateLimiter
 import math
+import folium
 parser = argparse.ArgumentParser()
 parser.add_argument('year')
 parser.add_argument('latitude')
@@ -236,17 +237,64 @@ Las Vegas, Nevada, USA', (36.3672559, -114.94851600000001), 9616261.132086199]]
     return lst
 
 
+def create_a_map(locations: list, films: list, locate: tuple, year_to_find: int):
+    """
+    This function creates a map. The first year is the basic one. The second shows
+    the ten films that were made nearest to latitude and longitude which were entered
+    from the command line. And the third one shows different locations where the one
+    film was made. In every layer of the map there is the marker that indicates the
+    location which were entered from the command line. To realise this function I used
+    the folium module.
+    """
+    html = """<h4>Film information:</h4>
+    The name: {}<br>
+    Location: {}<br>
+    Year: {}
+    """
+    map = folium.Map(location = locate, zoom_start= 2,  tiles = "cartodb positron")
+    fg_list = []
+    layer = folium.FeatureGroup(name = 'Base layer')
+    # creating the common marker
+    layer.add_child(folium.Marker(location = list(locate), \
+        popup=folium.Popup("""<strong>Your location</strong>"""), \
+        icon=folium.Icon(color = 'blue', icon='home')))
+    fg_list.append(layer)
+
+    names = [f'10 Films in {year_to_find}', films[0][0]]
+    i = 0
+    for sth in [locations, films]:
+        layer = folium.FeatureGroup(name = names[i])
+        layer.add_child(folium.Marker(location = list(locate), \
+            popup=folium.Popup("""<strong>Your location</strong>"""), \
+            icon=folium.Icon(color = 'blue', icon='home')))
+        for element in sth:
+            if sth == locations:
+                iframe = folium.IFrame(html=html.format(element[0], element[1], year_to_find), \
+                    width=300, height=100)
+                layer.add_child(folium.Marker(location=[element[2][0], element[2][1]], \
+                    popup=folium.Popup(iframe), icon=folium.Icon(color = 'green')))
+            else:
+                iframe = folium.IFrame(html=html.format(element[0], element[1], element[3]), \
+                    width=300, height=100)
+                layer.add_child(folium.Marker(location = [element[2][0], element[2][1]], \
+                    popup=folium.Popup(iframe), icon=folium.Icon(color = 'red')))
+        fg_list.append(layer)
+        i += 1
+    for layers in fg_list:
+        map.add_child(layers)
+    map.add_child(folium.LayerControl())
+    return map
+
+
 films_for_year = input_from_file(dataset, int(year)) # read the file
 film_in_different_locations = locations_for_film(dataset, film)
 locations_for_film_in_year = find_the_location(films_for_year)
 locations_for_one_film = find_the_location(film_in_different_locations)
 ten_films = finding_the_distance(float(latitude), float(longitude), locations_for_film_in_year)
-print(locations_for_film_in_year)
-print(locations_for_one_film)
-print(ten_films)
 
-
-print(films_for_year)
+map = create_a_map(ten_films, locations_for_one_film, tuple([float(latitude), \
+    float(longitude)]), int(year))
+map.save("My_map.html")
 
 if __name__ == "__main__":
     import doctest
