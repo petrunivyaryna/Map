@@ -48,3 +48,4 @@ To create this module I used lots of modules such as:
 * geopy (to determine coordinates)
 * math (to determine the distances)
 * folium (to form a map)
+* os (to check the input)
