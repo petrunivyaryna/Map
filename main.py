@@ -1,4 +1,11 @@
-"""
+"""This module of function should create a map.
+
+This map has three layers. The first layer is the basic one. The second
+shows the ten films that were made nearest to latitude and longitude
+which have to be entered from the command line. And the third one shows
+different locations where the one film was made.
+
+link to github: https://github.com/yarkapetruniv/Map.git
 """
 import argparse
 from geopy.geocoders import Nominatim
@@ -20,6 +27,7 @@ latitude = args.latitude
 longitude = args.longitude
 dataset = args.dataset
 film = args.film
+
 
 def input_from_file(path: str, needed_year: int) -> dict:
     """
@@ -179,7 +187,6 @@ Boulevard South, Las Vegas, Nevada, USA', (36.467255900000005, -114.848516000000
     return lst
 
 
-
 def finding_the_distance(lat: float, lon: float, lst: list) -> list:
     """
     This function is created to find the ten films that were made nearest to
@@ -239,7 +246,7 @@ Las Vegas, Nevada, USA', (36.3672559, -114.94851600000001), 9616261.132086199]]
 
 def create_a_map(locations: list, films: list, locate: tuple, year_to_find: int):
     """
-    This function creates a map. The first year is the basic one. The second shows
+    This function creates a map. The first layer is the basic one. The second shows
     the ten films that were made nearest to latitude and longitude which were entered
     from the command line. And the third one shows different locations where the one
     film was made. In every layer of the map there is the marker that indicates the
