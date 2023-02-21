@@ -4,10 +4,11 @@ import argparse
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderUnavailable
 # from geopy.extra.rate_limiter import RateLimiter
+import math
 parser = argparse.ArgumentParser()
 parser.add_argument('year')
 parser.add_argument('latitude')
-parser.add_argument('longtitude')
+parser.add_argument('longitude')
 parser.add_argument('dataset')
 parser.add_argument('film')
 
@@ -15,7 +16,7 @@ args = parser.parse_args()
 
 year = args.year
 latitude = args.latitude
-longtitude = args.longtitude
+longitude = args.longitude
 dataset = args.dataset
 film = args.film
 
@@ -174,12 +175,72 @@ Boulevard South, Las Vegas, Nevada, USA', (36.467255900000005, -114.848516000000
     return lst
 
 
+
+def finding_the_distance(lat: float, lon: float, lst: list) -> list:
+    """
+    This function is created to find the ten films that were made nearest to
+    latitude and longitude which were entered from the command line. It uses
+    math module and haversine formula. The function find the distance and then
+    add it to the appropriate list in list of lists.
+    >>> finding_the_distance(49.83826, 24.02324, [['"15SecondScare"', 'Coventry, \
+West Midlands, England, UK', (52.4081812, -1.510477)], ['"15SecondScare"', 'West \
+Hills, California, USA', (34.2032325, -118.645476)], ['"15SecondScare"', 'West \
+Hills, California, USA', (34.3032325, -118.54547600000001)], ['"DearGeorgette"', \
+'New York City, New York, USA', (40.7127281, -74.0060152)], ['"KateConwayisaJerk"', \
+'Toronto, Ontario, Canada', (43.6534817, -79.3839347)], ['"KateConwayisaJerk"', \
+"Remark's Bar & Grill - 1026 Coxwell Ave, Toronto, Ontario, Canada", (43.7534817, \
+-79.2839347)], ['"KateConwayisaJerk"', 'Gooderham Building, 49 Wellington Street East, \
+Toronto, Ontario, Canada', (43.648366800000005, -79.37439532076982)], ['"KateConwayisaJerk"', \
+"Russell Winkelaar's flat, Toronto, Ontario, Canada", (43.8534817, -79.18393470000001)], \
+['"KateConwayisaJerk"', 'Broadview Avenue, Toronto, Ontario, Canada', (43.6589555, \
+-79.3498659)], ['"Millennials"', 'Los Angeles, California, USA', (34.0536909, -118.242766)], \
+['"MommasGotBars"', 'Brooklyn, New York, USA', (40.6526006, -73.9497211)], ['"$tripped"', \
+'Riviera Hotel & Casino - 2901 Las Vegas Boulevard South, Las Vegas, Nevada, USA', \
+(36.1672559, -115.148516)], ['"$tripped"', 'Riviera Hotel & Casino - 2901 Las Vegas \
+Boulevard South, Las Vegas, Nevada, USA', (36.2672559, -115.048516)], ['"$tripped"', \
+'Riviera Hotel & Casino - 2901 Las Vegas Boulevard South, Las Vegas, Nevada, USA', \
+(36.3672559, -114.94851600000001)], ['"$tripped"', 'Riviera Hotel & Casino - 2901 Las \
+Vegas Boulevard South, Las Vegas, Nevada, USA', (36.467255900000005, -114.84851600000002)]])
+    [['"15SecondScare"', 'Coventry, West Midlands, England, UK', (52.4081812, -1.510477), \
+1795087.628780894], ['"DearGeorgette"', 'New York City, New York, USA', (40.7127281, \
+-74.0060152), 7174296.677735291], ['"MommasGotBars"', 'Brooklyn, New York, USA', \
+(40.6526006, -73.9497211), 7175663.884857866], ['"KateConwayisaJerk"', "Russell Winkelaar's \
+flat, Toronto, Ontario, Canada", (43.8534817, -79.18393470000001), 7223504.2893081475], \
+['"KateConwayisaJerk"', "Remark's Bar & Grill - 1026 Coxwell Ave, Toronto, Ontario, Canada", \
+(43.7534817, -79.2839347), 7237083.433467533], ['"KateConwayisaJerk"', 'Broadview Avenue, \
+Toronto, Ontario, Canada', (43.6589555, -79.3498659), 7248340.1752279475], ['"KateConwayisaJerk"', \
+'Gooderham Building, 49 Wellington Street East, Toronto, Ontario, Canada', (43.648366800000005, \
+-79.37439532076982), 7250555.088388052], ['"KateConwayisaJerk"', 'Toronto, Ontario, Canada', \
+(43.6534817, -79.3839347), 7250674.417998653], ['"$tripped"', 'Riviera Hotel & Casino - 2901 \
+Las Vegas Boulevard South, Las Vegas, Nevada, USA', (36.467255900000005, -114.84851600000002), \
+9602394.361387737], ['"$tripped"', 'Riviera Hotel & Casino - 2901 Las Vegas Boulevard South, \
+Las Vegas, Nevada, USA', (36.3672559, -114.94851600000001), 9616261.132086199]]
+    """
+    radius = 6371e3
+    lat_1 = lat * math.pi/180
+    for element in lst:
+        lat_2 = element[2][0] * math.pi/180
+        delta_lat = (element[2][0] - lat) * math.pi/180
+        delta_lon = (element[2][1] - lon) * math.pi/180
+        under_root = math.sin(delta_lat / 2) * math.sin(delta_lat / 2) + \
+        math.cos(lat_1) * math.cos(lat_2) * math.sin(delta_lon / 2) * math.sin(delta_lon / 2)
+        root = math.sqrt(under_root)
+        distance = 2 * radius * math.asin(root)
+        element.append(distance)
+    lst.sort(key = lambda x: x[3])
+    if len(lst) > 10:
+        return lst[:10]
+    return lst
+
+
 films_for_year = input_from_file(dataset, int(year)) # read the file
 film_in_different_locations = locations_for_film(dataset, film)
 locations_for_film_in_year = find_the_location(films_for_year)
 locations_for_one_film = find_the_location(film_in_different_locations)
+ten_films = finding_the_distance(float(latitude), float(longitude), locations_for_film_in_year)
 print(locations_for_film_in_year)
 print(locations_for_one_film)
+print(ten_films)
 
 
 print(films_for_year)
