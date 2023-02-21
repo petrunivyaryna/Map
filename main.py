@@ -163,7 +163,7 @@ Boulevard South, Las Vegas, Nevada, USA', (36.467255900000005, -114.848516000000
     i = 0
     for element in to_del:
         lst.pop(element - i)
-    i += 1
+        i += 1
     # checking if there are the same coordinates
     for sth in range(1, len(lst)):
         for previous in range(0, sth):
