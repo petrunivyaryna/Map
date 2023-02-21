@@ -13,6 +13,7 @@ from geopy.exc import GeocoderUnavailable
 # from geopy.extra.rate_limiter import RateLimiter
 import math
 import folium
+import os
 parser = argparse.ArgumentParser()
 parser.add_argument('year')
 parser.add_argument('latitude')
@@ -27,6 +28,23 @@ latitude = args.latitude
 longitude = args.longitude
 dataset = args.dataset
 film = args.film
+
+
+def check(year_of_filming: int, lat: float, lon: float, file: str) -> bool:
+    """
+    This function should check the incoming data.
+    >>> check(2016, 43.7534817, -80.001, "locations.list")
+    True
+    """
+    if year_of_filming >= 2023 or year_of_filming < 1890:
+        return False
+    if lat > 90 or lat < -90:
+        return False
+    if lon > 180 or lon < -180:
+        return False
+    if not os.path.isfile(file):
+        return False
+    return True
 
 
 def input_from_file(path: str, needed_year: int) -> dict:
@@ -293,15 +311,18 @@ def create_a_map(locations: list, films: list, locate: tuple, year_to_find: int)
     return map
 
 
-films_for_year = input_from_file(dataset, int(year)) # read the file
-film_in_different_locations = locations_for_film(dataset, film)
-locations_for_film_in_year = find_the_location(films_for_year)
-locations_for_one_film = find_the_location(film_in_different_locations)
-ten_films = finding_the_distance(float(latitude), float(longitude), locations_for_film_in_year)
+if check(int(year), float(latitude), float(longitude), dataset):
+    films_for_year = input_from_file(dataset, int(year)) # read the file
+    film_in_different_locations = locations_for_film(dataset, film)
+    locations_for_film_in_year = find_the_location(films_for_year)
+    locations_for_one_film = find_the_location(film_in_different_locations)
+    ten_films = finding_the_distance(float(latitude), float(longitude), locations_for_film_in_year)
 
-map = create_a_map(ten_films, locations_for_one_film, tuple([float(latitude), \
-    float(longitude)]), int(year))
-map.save("My_map.html")
+    map = create_a_map(ten_films, locations_for_one_film, tuple([float(latitude), \
+        float(longitude)]), int(year))
+    map.save("My_map.html")
+else:
+    print("The arguments are wrong")
 
 if __name__ == "__main__":
     import doctest
