@@ -110,8 +110,11 @@ New York, USA', 2006]]
 def find_the_location(lst: list) -> list:
     """
     This function is created to find the latitude and longitude of the location using
-    the element at the first index of list in lists of list. Then it should insert
-    the tuple of latitude and longitude to the list at the second index.
+    the element at the first index of list in lists of lists. Then it should insert
+    the tuple of latitude and longitude to the appropriate list at the second index.
+    If the GeocoderUnavailable exception occurs, I just delete the appropriate film
+    from the main list. If in the lst there are two films with the same coordinates,
+    I just add to one of the coordinates 0.1, so that the markers will be visible.
     >>> find_the_location([['"15SecondScare"', 'Coventry, West Midlands, England, UK'], \
 ['"15SecondScare"', 'West Hills, California, USA'], ['"15SecondScare"', 'West Hills, \
 California, USA'], ['"DearGeorgette"', 'New York City, New York, USA'], ['"KateConwayisaJerk"', \
